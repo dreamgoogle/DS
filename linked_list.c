@@ -8,7 +8,6 @@ struct nodee {
 };
 
 typedef struct nodee node;
-/* #define NULL ((node*)0);*/
 node *f_elem = NULL;
 node *l_elem = NULL;
 u8 len_of_list;
@@ -246,14 +245,6 @@ u8 delete_at_begin()
 	return ret;
 }
 
-u8 delete_after()
-{
-	printf("Inside delete_after\n");
-	u8 ret=1;
-
-	return ret;
-}
-
 node* return_node_from_last(u8 posn)
 {
 	printf("Inside return_node_from_last\n");
@@ -326,7 +317,60 @@ u8 delete_at_last()
 u8 delete_at_posn()
 {
 	printf("Inside delete_at_posn\n");
-	u8 ret=1;
+	u8 ret = FALSE, success = TRUE, i;
+	u32 position;
+	node *tmp_n,*tmp_n1;
+	printf("Which position you want to delete(1..n) : ");
+	do {
+		scanf_s("%u", &position);
+		if(position <= len_of_list)
+		{
+			success = TRUE;
+			if(position < 1)
+			{
+				success = FALSE;
+				printf("Position does not exist in the list. Choose position again(1..n) : ");
+			    scanf_s("%u",&position);
+			}
+			else if(position == 1)
+			{
+				tmp_n = f_elem;
+				f_elem = f_elem->link;
+				if (position == len_of_list)
+				{
+					l_elem = f_elem;
+				}
+				free(tmp_n);
+				len_of_list--;
+				ret = TRUE;
+			}
+			else if (position > 1)
+			{
+				tmp_n = f_elem;
+				i = 2;
+				while(position-i)
+				{
+					tmp_n = tmp_n->link;
+					i++;
+				}
+				tmp_n1 = tmp_n->link;
+				tmp_n->link = tmp_n->link->link;
+				if (position == len_of_list)
+				{
+					l_elem = tmp_n;
+				}
+				free(tmp_n1);
+				len_of_list--;
+				ret = TRUE;
+			}
+		}
+		else
+		{
+			success = FALSE;
+			printf("Position does not exist in the list. Choose position again(1..n) : ");
+			scanf_s("%u",&position);
+		}
+	}while(!success);
 	return ret;
 }
 
@@ -335,7 +379,7 @@ u8 delete_a_data()
 	printf("Inside delete_a_data\n");
 	u8 ret = TRUE,found;
 	u32 data;
-	node *tmp_n;
+	node *tmp_n,*tmp_n1;
 	if (f_elem == NULL)
 	{
 		printf("Nothing to delete. List is empty !!\n");
@@ -356,6 +400,7 @@ u8 delete_a_data()
 					l_elem = NULL;
 				}
 				found = TRUE;
+				free(tmp_n);
 				len_of_list--;
 			}
 			else
@@ -374,11 +419,13 @@ u8 delete_a_data()
 				}
 				if (found)
 				{
-					tmp_n->link = tmp_n->link->link;
 					if (tmp_n->link == l_elem) // If last node is deleted than update l_elem also
 					{
 						l_elem = tmp_n;
 					}
+					tmp_n1 = tmp_n->link;
+					tmp_n->link = tmp_n->link->link;
+					free(tmp_n1);
 					len_of_list--;
 				}
 				else
@@ -389,7 +436,6 @@ u8 delete_a_data()
 			}
 		} while (!found);
 	}
-	
 	return ret;
 }
 
@@ -398,7 +444,7 @@ void delete()
 	printf("Inside Delete\n");
 	u32 option;
 	u8 ret = TRUE;
-	printf("Deleting options\n1) Delete at beginning \n2) Delete after some data x\n3) Delete at last\n4) Delete at a position\n5) Delete a data\n");
+	printf("Deleting options\n1) Delete at beginning \n2) Delete at last\n3) Delete at a position\n4) Delete a data\n");
 	printf("How do you want to delete :");
 	do {
 		scanf_s("%d", &option);
@@ -406,13 +452,11 @@ void delete()
 		{
 		case 1: ret = delete_at_begin();
 				break;
-		case 2: ret = delete_after();
+		case 2: ret = delete_at_last();
 				break;
-		case 3: ret = delete_at_last();
+		case 3: ret = delete_at_posn();
 				break;
-		case 4: ret = delete_at_posn();
-				break;
-		case 5: ret = delete_a_data();
+		case 4: ret = delete_a_data();
 				break;
 		default:option = 0;
 				printf("Wrong choice!! Choose correct option : ");
